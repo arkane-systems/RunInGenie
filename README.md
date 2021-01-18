@@ -1,6 +1,8 @@
 # RunInGenie
 Quickly run a WSL/Linux command from a Windows (e.g., PowerShell or CMD) prompt.
 
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I1VA18)
+
 ## Introduction
 This is essentially a variant of [RunInBash](https://github.com/neosmart/RunInBash) designed to run Linux commands under WSL
 inside the bottle created by _genie_ (see https://github.com/arkane-systems/genie) if you aren't familiar with
@@ -47,3 +49,8 @@ to upgrade your genie installation.
 
 <img src="runingenie.png" alt="example screenshot" />
 
+## Bugs
+
+Yes, there almost certainly are. Quoting is complicated.
+
+Reports of commands which break when used with RunInGenie are welcome. Patches and pull requests are even more welcome.
