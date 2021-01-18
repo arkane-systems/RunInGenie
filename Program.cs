@@ -65,7 +65,7 @@ namespace ArkaneSystems.RunInGenie
                 if (drive.DriveType == DriveType.Fixed)
 
                     // We can invoke wslpath.
-                    return InvokeWslpath (path: fullPath);
+                    return $"'{InvokeWslpath (path: fullPath)}'";
 
                 // Otherwise...
                 throw new InvalidOperationException (message: "Cannot translate paths for non-fixed drives... yet.");
@@ -115,16 +115,9 @@ namespace ArkaneSystems.RunInGenie
                     param.Add (item: Program.IsWindowsPath (arg: arg) ? Program.TranslatePath (path: arg) : arg);
 
                 // Execute in WSL.
-                var psi = new ProcessStartInfo (fileName: "wsl");
+                Process ps = Process.Start (fileName: "wsl",
+                                            arguments: $"-e genie -c sh -c \"{string.Join (separator: ' ', values: param)}\"");
 
-                psi.ArgumentList.Add (item: "-e");
-                psi.ArgumentList.Add (item: "genie");
-                psi.ArgumentList.Add (item: "-c");
-
-                foreach (var p in param)
-                    psi.ArgumentList.Add (item: p);
-
-                Process ps = Process.Start (startInfo: psi)!;
                 ps.WaitForExit ();
 
                 return ps.ExitCode;
