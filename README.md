@@ -23,7 +23,7 @@ and there you go!
 Linux athena-wsl 5.4.83-arkane-20210117-microsoft-custom-wsl2+ #4 SMP Sun Jan 17 08:37:12 CST 2021 x86_64 GNU/Linux
 ```
 
-Note that by default pipes (|) will be interpreted by PowerShell, so:
+Note that by default pipes (|), etc., will be interpreted by PowerShell, so:
 
 ```
 $ ls -la 'C:\Program Files' | clip
@@ -38,7 +38,7 @@ $ ls -la 'C:\Program Files' `| less
 
 ## Installation
 
-Grab the latest $.zip from the Releases page, unzip it, and put the resulting $.exe somewhere on your PATH. Easy!
+Grab the latest RunInGenie.zip from the Releases page, unzip it, and put the resulting $.exe somewhere on your PATH. Easy!
 
 This assumes, of course, that you already have genie installed and running correctly. If not, it won't work.
 genie 1.32 or higher is recommended, as earlier versions of genie had issues with arguments containing spaces.
