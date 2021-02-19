@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 
 #endregion
 
@@ -75,6 +77,29 @@ namespace ArkaneSystems.RunInGenie
             throw new InvalidOperationException (message: "What the path is this?");
         }
 
+        private static IConfiguration Configuration {
+
+            get
+            {
+                IConfiguration config = new ConfigurationBuilder()
+                    .AddJsonFile("$.json", true, false)
+                    .Build();
+                return config;
+            }
+        }
+
+        private static string Shell
+        {
+            get
+            {
+                string shell = Configuration["shell"];
+                if(shell == null || shell.Equals(String.Empty)) {
+                    shell = "sh";
+                }
+                return shell;
+            }
+        }
+
         private static void PrintHelp ()
         {
             ConsoleColor oldColor = Console.ForegroundColor;
@@ -105,18 +130,27 @@ namespace ArkaneSystems.RunInGenie
 
             try
             {
-                // Check through arguments, one by one.
-                var param = new List<string> ();
+                string shell = Program.Shell;
 
-                foreach (var arg in args)
+                Process ps;
+                if(args.Length == 0) {
+                    // No arguments given
+                    ps = Process.Start (fileName: "wsl",
+                                            arguments: $"-e genie -c {shell}");
+                } else {
+                    // Check through arguments, one by one.
+                    var param = new List<string> ();
 
-                    // Identify those which are probably Windows paths.
-                    // And perform path translation.
-                    param.Add (item: Program.IsWindowsPath (arg: arg) ? Program.TranslatePath (path: arg) : arg);
+                    foreach (var arg in args)
+                        // Identify those which are probably Windows paths.
+                        // And perform path translation.
+                        param.Add (item: Program.IsWindowsPath (arg: arg) ? Program.TranslatePath (path: arg) : arg);
 
-                // Execute in WSL.
-                Process ps = Process.Start (fileName: "wsl",
-                                            arguments: $"-e genie -c sh -c \"{string.Join (separator: ' ', values: param)}\"");
+                    // Execute in WSL.
+                    ps = Process.Start (fileName: "wsl",
+                                            arguments: $"-e genie -c {shell} -c \"{string.Join (separator: ' ', values: param)}\"");
+                }
+
 
                 ps.WaitForExit ();
 
