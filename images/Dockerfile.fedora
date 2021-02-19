@@ -1,0 +1,6 @@
+FROM registry.fedoraproject.org/fedora:latest
+WORKDIR /app
+
+RUN dnf install -y dotnet-sdk-5.0
+
+COPY . .
