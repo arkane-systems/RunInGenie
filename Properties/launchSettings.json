@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RunInGenie": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Working"
+    }
+  }
+}

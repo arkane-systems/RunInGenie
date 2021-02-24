@@ -2,7 +2,7 @@
 
 // RunInGenie - Program.cs
 // 
-// Created by: Alistair J R Young (avatar) at 2021/01/17 1:07 PM.
+// Created by: Alistair J R Young (avatar) at 2021/02/24 1:21 AM.
 
 #endregion
 
@@ -12,8 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
 
 #endregion
 
@@ -21,6 +22,39 @@ namespace ArkaneSystems.RunInGenie
 {
     internal static class Program
     {
+        private static IConfiguration Configuration
+        {
+            get
+            {
+                IConfiguration config = new ConfigurationBuilder ()
+                                       .AddJsonFile (path: "$.json", optional: true, reloadOnChange: false)
+                                       .Build ();
+
+                return config;
+            }
+        }
+
+        private static string Shell
+        {
+            get
+            {
+                string shell                                                   = Program.Configuration[key: "shell"];
+                if (shell == null || shell.Equals (value: string.Empty)) shell = "sh";
+
+                return shell;
+            }
+        }
+
+        private static string Distro
+        {
+            get
+            {
+                string distro = Program.Configuration[key: "distro"];
+
+                return distro ?? string.Empty;
+            }
+        }
+
         private static bool IsWindowsPath (string arg)
         {
             try
@@ -37,8 +71,10 @@ namespace ArkaneSystems.RunInGenie
 
         private static string TranslatePath (string path)
         {
+            // ReSharper disable once VariableHidesOuterVariable
             string InvokeWslpath (string path)
             {
+                // ReSharper disable once UseObjectOrCollectionInitializer
                 Process wp = new ();
                 wp.StartInfo.UseShellExecute        = false;
                 wp.StartInfo.RedirectStandardOutput = true;
@@ -77,38 +113,6 @@ namespace ArkaneSystems.RunInGenie
             throw new InvalidOperationException (message: "What the path is this?");
         }
 
-        private static IConfiguration Configuration {
-
-            get
-            {
-                IConfiguration config = new ConfigurationBuilder()
-                    .AddJsonFile("$.json", true, false)
-                    .Build();
-                return config;
-            }
-        }
-
-        private static string Shell
-        {
-            get
-            {
-                string shell = Configuration["shell"];
-                if(shell == null || shell.Equals(String.Empty)) {
-                    shell = "sh";
-                }
-                return shell;
-            }
-        }
-
-        private static string Distro
-        {
-            get
-            {
-                string distro = Configuration["distro"];
-                return (distro != null) ? distro : String.Empty; 
-            }
-        }
-
         private static void PrintHelp ()
         {
             ConsoleColor oldColor = Console.ForegroundColor;
@@ -125,11 +129,24 @@ namespace ArkaneSystems.RunInGenie
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine (value: "$ systemctl status\n");
             Console.ForegroundColor = oldColor;
+
+            Console.WriteLine (value: "$ without a following command starts a (non-login) shell.\n");
+
+            Console.WriteLine (value: "A WSL distribution other than the default can be supplied using the -d/--distro option:");
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine (value: "$ -d alpine systemctl status\n");
+            Console.ForegroundColor = oldColor;
         }
 
         private static int Main (string[] args)
         {
-            // First check if help has been requested; if so, print it.
+            // Set default distro and shell
+            string distro = Program.Distro == string.Empty ? string.Empty : "-d {Program.Distro}";
+            string shell  = Program.Shell  == string.Empty ? "sh" : Program.Shell;
+
+            // Cheap and nasty manual command parsing.
+            // First check if help has been requested; if so, print it and exit.
             if (args.Length == 1 && (args[0] == "-h" || args[0] == "--help"))
             {
                 Program.PrintHelp ();
@@ -137,18 +154,34 @@ namespace ArkaneSystems.RunInGenie
                 return 0;
             }
 
+            // Second, check if a distro was specified (must be first argument).
+            if (args.Length >= 1 && (args[0] == "-d" || args[0] == "--distro"))
+            {
+                if (args.Length == 1)
+                {
+                    Console.WriteLine (value: "If specifying a distro, you must specify a distro.");
+
+                    return 1;
+                }
+
+                distro = $"-d {args[1]}";
+
+                args = args.Skip (count: 2).ToArray ();
+            }
+
             try
             {
-                // Set chosen distro and shell
-                string distro = (Program.Distro == String.Empty) ? String.Empty : "-d {Program.Distro}";
-                string arguments = $"{distro} genie -c {Program.Shell}";
+                string arguments = $"{distro} genie -c {shell}";
 
                 Process ps;
-                if(args.Length > 0) {
+
+                if (args.Length > 0)
+                {
                     // Check through additional arguments, one by one.
                     var param = new List<string> ();
 
                     foreach (var arg in args)
+
                         // Identify those which are probably Windows paths.
                         // And perform path translation.
                         param.Add (item: Program.IsWindowsPath (arg: arg) ? Program.TranslatePath (path: arg) : arg);
