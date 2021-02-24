@@ -100,6 +100,15 @@ namespace ArkaneSystems.RunInGenie
             }
         }
 
+        private static string Distro
+        {
+            get
+            {
+                string distro = Configuration["distro"];
+                return (distro != null) ? distro : String.Empty; 
+            }
+        }
+
         private static void PrintHelp ()
         {
             ConsoleColor oldColor = Console.ForegroundColor;
@@ -130,15 +139,13 @@ namespace ArkaneSystems.RunInGenie
 
             try
             {
-                string shell = Program.Shell;
+                // Set chosen distro and shell
+                string distro = (Program.Distro == String.Empty) ? String.Empty : "-d {Program.Distro}";
+                string arguments = $"{distro} genie -c {Program.Shell}";
 
                 Process ps;
-                if(args.Length == 0) {
-                    // No arguments given
-                    ps = Process.Start (fileName: "wsl",
-                                            arguments: $"-e genie -c {shell}");
-                } else {
-                    // Check through arguments, one by one.
+                if(args.Length > 0) {
+                    // Check through additional arguments, one by one.
                     var param = new List<string> ();
 
                     foreach (var arg in args)
@@ -147,11 +154,10 @@ namespace ArkaneSystems.RunInGenie
                         param.Add (item: Program.IsWindowsPath (arg: arg) ? Program.TranslatePath (path: arg) : arg);
 
                     // Execute in WSL.
-                    ps = Process.Start (fileName: "wsl",
-                                            arguments: $"-e genie -c {shell} -c \"{string.Join (separator: ' ', values: param)}\"");
+                    arguments = $"{arguments} -c \"{string.Join (separator: ' ', values: param)}\"";
                 }
 
-
+                ps = Process.Start (fileName: "wsl", arguments: arguments);
                 ps.WaitForExit ();
 
                 return ps.ExitCode;
