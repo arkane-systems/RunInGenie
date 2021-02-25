@@ -6,7 +6,7 @@
     <RootNamespace>ArkaneSystems.RunInGenie</RootNamespace>
     <AssemblyName>$</AssemblyName>
     <Nullable>enable</Nullable>
-    <Version>0.2</Version>
+    <Version>0.3</Version>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
