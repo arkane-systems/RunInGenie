@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>ArkaneSystems.RunInGenie</RootNamespace>
     <AssemblyName>$</AssemblyName>
     <Nullable>enable</Nullable>
@@ -12,11 +12,11 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Authors>Alistair J. R. Young</Authors>
     <Company>Arkane Systems</Company>
-    <Product />
+    <Product></Product>
     <Copyright>Copyright (c) 2021 Arkane Systems</Copyright>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+    
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
   </ItemGroup>
 </Project>
